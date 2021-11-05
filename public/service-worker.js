@@ -1,5 +1,3 @@
-'use strict';
-import test from './icons/'
 //which files needed to be cached
 const FILES_TO_CACHE = [
     '/index.html',
