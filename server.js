@@ -1,3 +1,5 @@
+
+'use strict';
 const express = require("express");
 // require('dotenv').config()
 const logger = require("morgan");
@@ -16,7 +18,7 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://pwatracker.herokuapp.com/", {
+mongoose.connect("mongodb://localhost/budget", {
   useNewUrlParser: true,
   useFindAndModify: false,
   useUnifiedTopology: true,
