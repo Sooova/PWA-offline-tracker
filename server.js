@@ -16,7 +16,7 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost/budget", {
+mongoose.connect("mongodb://pwatracker.herokuapp.com/", {
   useNewUrlParser: true,
   useFindAndModify: false,
   useUnifiedTopology: true,
