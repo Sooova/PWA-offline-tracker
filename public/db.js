@@ -1,22 +1,50 @@
 let db;
+
+const indexedDB =
+    window.indexedDB ||
+    window.mozIndexedDB ||
+    window.webkitIndexedDB ||
+    window.msIndexedDB ||
+    window.shimIndexedDB;
+
 const request = indexedDB.open("budget", 1);
 
-request.onupgradeneeded = (event) => {
+request.onupgradeneeded = function (event) {
     const db = event.target.result;
     db.createObjectStore("pending", { autoIncrement: true });
 };
 
+request.onsuccess = function (event) {
+    db = event.target.result;
 
-dbCheck = function () {
+    if (navigator.onLine) {
+        checkDatabase();
+    }
+};
+
+request.onerror = function (event) {
+    console.log("Woops! " + event.target.errorCode);
+};
+
+function saveRecord(record) {
+    console.log("in indexedDB.js / saveRecord ---------------------" + record);
     const transaction = db.transaction(["pending"], "readwrite");
+    console.log("in indexedDB.js / saveRecord / transaction ----------------" + transaction);
     const store = transaction.objectStore("pending");
-    const storeGetAll = store.getAll();
+    store.add(record);
+}
 
-    getAll.onsuccess = () => {
+function checkDatabase() {
+    const transaction = db.transaction(["pending"], "readwrite");
+    console.log("in indexedDB.js / checkDatabase / transaction ----------------" + transaction);
+    const store = transaction.objectStore("pending");
+    const getAll = store.getAll();
+
+    getAll.onsuccess = function () {
         if (getAll.result.length > 0) {
             fetch("/api/transaction/bulk", {
                 method: "POST",
-                body: JSON.stringify(storeGetAll.result),
+                body: JSON.stringify(getAll.result),
                 headers: {
                     Accept: "application/json, text/plain, */*",
                     "Content-Type": "application/json"
@@ -32,31 +60,5 @@ dbCheck = function () {
     };
 }
 
-
-request.onsuccess = (event) => {
-    db = event.target.result;
-
-    // is navigator online?
-    if (navigator.onLine) {
-        dbCheck();
-    }
-};
-
-
-request.onerror = (event) => {
-    console.log("Please see error: " + event.target.errorCode);
-};
-
-function saveCurrent(record) {
-    const transaction = db.transaction(["pending"], "readwrite");
-    const store = transaction.objectStore("pending");
-    store.add(record);
-}
-
-function clearWaiting() {
-    const transaction = db.transaction(["pending"], "readwrite");
-    const store = transaction.objectStore("pending");
-    store.clear();
-}
-
-window.addEventListener("online", dbCheck);
+// event listener for when app comes back online
+window.addEventListener("online", checkDatabase);
